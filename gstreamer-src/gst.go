@@ -40,42 +40,11 @@ const (
 )
 
 // CreatePipeline creates a GStreamer Pipeline
-func CreatePipeline(codecName string, tracks []*webrtc.Track, pipelineSrc string) *Pipeline {
-	pipelineStr := "appsink name=appsink"
+func CreatePipeline(tracks []*webrtc.Track) *Pipeline {
+	pipelineStr := "v4l2src ! video/x-raw, width=640, height=640, framerate=30/1 ! videoconvert ! video/x-raw,format=I420 ! omxh264enc control-rate=1 target-bitrate=1800000 ! h264parse config-interval=3 ! video/x-h264,stream-format=byte-stream ! appsink name=appsink"
+
 	var clockRate float32
-
-	switch codecName {
-	case webrtc.VP8:
-		pipelineStr = pipelineSrc + " ! vp8enc error-resilient=partitions keyframe-max-dist=10 auto-alt-ref=true cpu-used=5 deadline=1 ! " + pipelineStr
-		clockRate = videoClockRate
-
-	case webrtc.VP9:
-		pipelineStr = pipelineSrc + " ! vp9enc ! " + pipelineStr
-		clockRate = videoClockRate
-
-	case webrtc.H264:
-		pipelineStr = pipelineSrc + " ! video/x-raw,format=I420 ! x264enc speed-preset=ultrafast tune=zerolatency key-int-max=20 ! video/x-h264,stream-format=byte-stream ! " + pipelineStr
-		clockRate = videoClockRate
-
-	case webrtc.Opus:
-		pipelineStr = pipelineSrc + " ! opusenc ! " + pipelineStr
-		clockRate = audioClockRate
-
-	case webrtc.G722:
-		pipelineStr = pipelineSrc + " ! avenc_g722 ! " + pipelineStr
-		clockRate = audioClockRate
-
-	case webrtc.PCMU:
-		pipelineStr = pipelineSrc + " ! audio/x-raw, rate=8000 ! mulawenc ! " + pipelineStr
-		clockRate = pcmClockRate
-
-	case webrtc.PCMA:
-		pipelineStr = pipelineSrc + " ! audio/x-raw, rate=8000 ! alawenc ! " + pipelineStr
-		clockRate = pcmClockRate
-
-	default:
-		panic("Unhandled codec " + codecName)
-	}
+	clockRate = videoClockRate
 
 	pipelineStrUnsafe := C.CString(pipelineStr)
 	defer C.free(unsafe.Pointer(pipelineStrUnsafe))
@@ -87,7 +56,7 @@ func CreatePipeline(codecName string, tracks []*webrtc.Track, pipelineSrc string
 		Pipeline:  C.gstreamer_send_create_pipeline(pipelineStrUnsafe),
 		tracks:    tracks,
 		id:        len(pipelines),
-		codecName: codecName,
+		codecName: webrtc.H264,
 		clockRate: clockRate,
 	}
 

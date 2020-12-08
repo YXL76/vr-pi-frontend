@@ -71,7 +71,7 @@ func main() {
 				panic(err)
 			}
 			c.WriteJSON(answer)
-			gst.CreatePipeline(webrtc.H264, []*webrtc.Track{videoTrack}, "v4l2src").Start()
+			gst.CreatePipeline([]*webrtc.Track{videoTrack}).Start()
 		}
 	}()
 
