@@ -29,6 +29,7 @@ func Open() (*Device, error) {
 		conn: c,
 		addr: addr,
 	}
+	dev.Write(modeAdr, 0x00)
 
 	time.Sleep(50 * time.Millisecond) // wait required time
 	return &dev, err
@@ -51,26 +52,26 @@ func (dev *Device) Close() error {
 }
 
 // SetFrequency SetFrequency
-func (dev *Device) SetFrequency(frequency int) {
+func (dev *Device) SetFrequency(frequency float64) {
 	prescaleval := 25000000.0 // 25MHz
 	prescaleval /= 4096.0     // 12-bit
-	prescaleval /= float64(frequency)
+	prescaleval /= frequency
 	prescaleval -= 1.0
 
 	prescale := math.Floor(prescaleval + 0.5)
 
 	oldmode := dev.Read(modeAdr)
-	newmode := (oldmode & 0x7F) | 0x10 // sleep
-	dev.Write(modeAdr, newmode)        // go to sleep
+	newmode := (oldmode & 0x7F) | 0x10
+	dev.Write(modeAdr, newmode)
 	dev.Write(prescaleAdr, uint8(math.Floor(prescale)))
 	dev.Write(modeAdr, oldmode)
-	time.Sleep(5)
+	time.Sleep(5 * time.Millisecond)
 	dev.Write(modeAdr, oldmode|0x80)
 }
 
 // SetPulse SetPulse
-func (dev *Device) SetPulse(channel uint8, pulse int) {
-	pulse = pulse * 4096 / 20000 // PWM frequency is 50HZ, the period is 20000us
-	dev.Write(lowAdr+4*channel, uint8(pulse&0xFF))
-	dev.Write(highAdr+4*channel, uint8(pulse>>8))
+func (dev *Device) SetPulse(channel uint8, pulse float64) {
+	duty := int(pulse * 4096 / 20000) // PWM frequency is 50HZ, the period is 20000us
+	dev.Write(lowAdr+4*channel, uint8(duty&0xFF))
+	dev.Write(highAdr+4*channel, uint8(duty>>8))
 }

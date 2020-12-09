@@ -83,7 +83,7 @@ func main() {
 	}
 	defer device.Close()
 
-	device.SetFrequency(50)
+	device.SetFrequency(50.0)
 
 	u2 := url.URL{Scheme: "ws", Host: "47.96.250.166:8080", Path: "/sensor/"}
 
@@ -103,7 +103,7 @@ func main() {
 
 		var v Rotation
 		for {
-			err := c1.ReadJSON(&v)
+			err := c2.ReadJSON(&v)
 			if err != nil {
 				panic(err)
 			}
@@ -113,8 +113,8 @@ func main() {
 			verticalDuty := a*verticalDirection*verticalDirection + b*verticalDirection + c
 			levelDuty := a*levelDirection*levelDirection + b*levelDirection + c
 
-			device.SetPulse(0, int(verticalDuty))
-			device.SetPulse(1, int(levelDuty))
+			device.SetPulse(0, verticalDuty)
+			device.SetPulse(1, levelDuty)
 		}
 	}()
 
