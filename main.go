@@ -13,9 +13,9 @@ import (
 
 // Rotation Rotation
 type Rotation struct {
-	Gamma float64
 	Alpha float64
-	Beta  float64
+	// Beta  float64
+	Gamma float64
 }
 
 func main() {
@@ -97,24 +97,49 @@ func main() {
 
 	go func() {
 		defer close(done2)
-		a := 5.71559214e-05
+		/* a := 5.71559214e-05
 		b := 3.60082305e-02
-		c := 2.50000000
+		c := 2.50000000 */
 
 		var v Rotation
+		var alpha float64
+		var gamma float64
 		for {
 			err := c2.ReadJSON(&v)
 			if err != nil {
 				panic(err)
 			}
-			verticalDirection := v.Gamma * -180.0 / math.Pi
+			gamma = v.Gamma + 40 // 0 ~ 130,-50 ~ 0
+			if gamma < 0 {
+				gamma += 180 // 0 ~ 180
+				if v.Alpha < 90 {
+					// 0 ~ 90
+					alpha = v.Alpha + 110 // 110 ~ 200
+				} else {
+					// 250 ~ 360
+					alpha = v.Alpha - 250 // 0 ~ 110
+				}
+			} else {
+				alpha = v.Alpha - 70 // 0 ~ 200
+			}
+
+			gamma = math.Max(gamma, 0)
+			gamma = math.Min(gamma, 180)
+
+			alpha = math.Max(alpha, 0)
+			alpha = math.Min(alpha, 200)
+
+			device.SetPulse(0, gamma*9+590)
+			device.SetPulse(1, alpha*10+400)
+
+			/* verticalDirection := v.Gamma * -180.0 / math.Pi
 			levelDirection := 180.0 - (v.Alpha * -180.0 / math.Pi)
 
 			verticalDuty := a*verticalDirection*verticalDirection + b*verticalDirection + c
 			levelDuty := a*levelDirection*levelDirection + b*levelDirection + c
 
 			device.SetPulse(0, verticalDuty)
-			device.SetPulse(1, levelDuty)
+			device.SetPulse(1, levelDuty)*/
 		}
 	}()
 
