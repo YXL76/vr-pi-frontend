@@ -18,6 +18,12 @@ type Rotation struct {
 	Gamma float64
 }
 
+func setInterval(s, min, max float64) float64 {
+	target := math.Max(s, min)
+	target = math.Min(target, max)
+	return target
+}
+
 func main() {
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
@@ -109,28 +115,28 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			gamma = v.Gamma + 40 // 0 ~ 130,-50 ~ 0
-			if gamma < 0 {
-				gamma += 180 // 0 ~ 180
-				if v.Alpha < 90 {
-					// 0 ~ 90
-					alpha = v.Alpha + 110 // 110 ~ 200
-				} else {
-					// 250 ~ 360
-					alpha = v.Alpha - 250 // 0 ~ 110
-				}
+
+			if v.Gamma > 0 {
+				alpha = setInterval(v.Alpha, 90, 300)
+				alpha -= 270
 			} else {
-				alpha = v.Alpha - 70 // 0 ~ 200
+				if v.Alpha > 195 {
+					alpha = setInterval(v.Alpha, 270, 360)
+					alpha -= 270
+				} else {
+					alpha = setInterval(v.Alpha, 0, 120)
+					alpha += 90
+				}
 			}
 
-			gamma = math.Max(gamma, 0)
-			gamma = math.Min(gamma, 180)
+			if v.Gamma > 45 {
+				gamma = -v.Gamma + 225
+			} else {
+				gamma = -v.Gamma + 45
+			}
 
-			alpha = math.Max(alpha, 0)
-			alpha = math.Min(alpha, 200)
-
-			device.SetPulse(0, gamma*9+590)
-			device.SetPulse(1, alpha*10+400)
+			device.SetPulse(0, gamma*10+500)
+			device.SetPulse(1, alpha*10+500)
 
 			/* verticalDirection := v.Gamma * -180.0 / math.Pi
 			levelDirection := 180.0 - (v.Alpha * -180.0 / math.Pi)
