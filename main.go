@@ -4,11 +4,11 @@ import (
 	"math"
 	"net/url"
 
-	"github.com/YXL76/vr-pi-frontend/pca9685"
+	"github.com/YXL76/vrpi-pi/pca9685"
 	"github.com/gorilla/websocket"
 	"github.com/pion/webrtc/v2"
 
-	gst "github.com/YXL76/vr-pi-frontend/gstreamer-src"
+	gst "github.com/YXL76/vrpi-pi/gstreamer-src"
 )
 
 // Rotation Rotation

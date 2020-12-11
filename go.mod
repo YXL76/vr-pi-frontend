@@ -1,4 +1,4 @@
-module github.com/YXL76/vr-pi-frontend
+module github.com/YXL76/vrpi-pi
 
 go 1.15
 

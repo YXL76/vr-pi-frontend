@@ -1,1 +1,1 @@
-# vr-pi-frontend
+# vrpi-pi
