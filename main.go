@@ -31,7 +31,6 @@ func main() {
 				URLs: []string{"stun:stun.l.google.com:19302"},
 			},
 		},
-		SDPSemantics: webrtc.SDPSemanticsPlanB,
 	}
 
 	peerConnection, err := webrtc.NewPeerConnection(config)
