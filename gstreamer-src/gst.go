@@ -40,9 +40,20 @@ const (
 )
 
 // CreatePipeline creates a GStreamer Pipeline
-func CreatePipeline(tracks []*webrtc.Track) *Pipeline {
-	pipelineStr := "v4l2src ! video/x-raw, width=640, height=640, framerate=30/1 ! videoconvert ! video/x-raw,format=I420 ! omxh264enc control-rate=1 target-bitrate=1800000 ! h264parse config-interval=3 ! video/x-h264,stream-format=byte-stream ! appsink name=appsink"
+func CreatePipeline(codecName string, tracks []*webrtc.Track) *Pipeline {
+	pipelineStr := "appsink name=appsink"
+	pipelineSrc := "v4l2src ! video/x-raw, width=640, height=640, framerate=30/1"
 
+	switch codecName {
+	case webrtc.VP8:
+		pipelineStr = pipelineSrc + " ! vp8enc error-resilient=partitions keyframe-max-dist=10 auto-alt-ref=true cpu-used=5 deadline=1 ! " + pipelineStr
+
+	case webrtc.VP9:
+		pipelineStr = pipelineSrc + " ! vp9enc ! " + pipelineStr
+
+	case webrtc.H264:
+		pipelineStr = pipelineSrc + " ! videoconvert ! video/x-raw,format=I420 ! omxh264enc control-rate=1 target-bitrate=1800000 ! h264parse config-interval=3 ! video/x-h264,stream-format=byte-stream ! " + pipelineStr
+	}
 	var clockRate float32
 	clockRate = videoClockRate
 

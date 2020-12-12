@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"math"
 	"net/url"
 
@@ -25,6 +26,8 @@ func setInterval(s, min, max float64) float64 {
 }
 
 func main() {
+	videoFormat := flag.String("format", "vp8", "GStreamer video format")
+
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
 			{
@@ -38,7 +41,19 @@ func main() {
 		panic(err)
 	}
 
-	videoTrack, err := peerConnection.NewTrack(webrtc.DefaultPayloadTypeH264, 2048, "video", "video")
+	var payloadType uint8 = webrtc.DefaultPayloadTypeVP8
+	codecName := webrtc.VP8
+
+	switch *videoFormat {
+	case "vp9":
+		payloadType = webrtc.DefaultPayloadTypeVP8
+		codecName = webrtc.VP9
+	case "h264":
+		payloadType = webrtc.DefaultPayloadTypeH264
+		codecName = webrtc.H264
+	}
+
+	videoTrack, err := peerConnection.NewTrack(payloadType, 2048, "video", "video")
 	if err != nil {
 		panic(err)
 	}
@@ -46,7 +61,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	gst.CreatePipeline([]*webrtc.Track{videoTrack}).Start()
+	gst.CreatePipeline(codecName, []*webrtc.Track{videoTrack}).Start()
 
 	u1 := url.URL{Scheme: "ws", Host: "47.96.250.166:8080", Path: "/webrtc/"}
 
