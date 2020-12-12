@@ -27,6 +27,7 @@ func setInterval(s, min, max float64) float64 {
 
 func main() {
 	videoFormat := flag.String("format", "vp8", "GStreamer video format")
+	sdpSemantics := flag.String("dsp", "a", "SDP Semantics")
 
 	config := webrtc.Configuration{
 		ICEServers: []webrtc.ICEServer{
@@ -34,6 +35,18 @@ func main() {
 				URLs: []string{"stun:stun.l.google.com:19302"},
 			},
 		},
+	}
+
+	switch *sdpSemantics {
+	case "b":
+		config = webrtc.Configuration{
+			ICEServers: []webrtc.ICEServer{
+				{
+					URLs: []string{"stun:stun.l.google.com:19302"},
+				},
+			},
+			SDPSemantics: webrtc.SDPSemanticsPlanB,
+		}
 	}
 
 	peerConnection, err := webrtc.NewPeerConnection(config)
@@ -104,6 +117,8 @@ func main() {
 	defer device.Close()
 
 	device.SetFrequency(50.0)
+	defer device.SetPulse(0, 0)
+	defer device.SetPulse(1, 0)
 
 	u2 := url.URL{Scheme: "ws", Host: "47.96.250.166:8080", Path: "/sensor/"}
 
