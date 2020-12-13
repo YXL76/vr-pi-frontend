@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"math"
 	"net/url"
 
@@ -95,6 +96,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
+			fmt.Printf("%+v\n", v)
 			err = peerConnection.SetRemoteDescription(v)
 			if err != nil {
 				panic(err)
