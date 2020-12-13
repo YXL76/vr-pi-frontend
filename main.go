@@ -82,6 +82,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	println("Webrtc connection establish")
 	defer c1.Close()
 
 	done1 := make(chan struct{})
@@ -126,6 +127,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	println("Sensor connection establish")
 	defer c2.Close()
 
 	done2 := make(chan struct{})
