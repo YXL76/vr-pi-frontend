@@ -35,8 +35,6 @@ var pipelinesLock sync.Mutex
 
 const (
 	videoClockRate = 90000
-	audioClockRate = 48000
-	pcmClockRate   = 8000
 )
 
 // CreatePipeline creates a GStreamer Pipeline

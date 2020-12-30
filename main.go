@@ -109,7 +109,7 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
-			c1.WriteJSON(answer)
+			err = c1.WriteJSON(answer)
 		}
 	}()
 
