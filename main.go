@@ -27,7 +27,12 @@ func setInterval(s, min, max float64) float64 {
 }
 
 func main() {
+	// 视频格式，可选 vp8, h264，默认为 vp8
+	// 树莓派支持硬解 h264，资源占用小，延迟对，但是安卓端可能会出现无法播放的情况
+	// vp8 资源占用较高，不过平台支持性良好
 	videoFormat := flag.String("format", "vp8", "GStreamer video format")
+	// sdp方案，可选 a, b，默认为 a
+	// 通常都是使用 a，对于 Android 原生应用，应使用 b
 	sdpSemantics := flag.String("dsp", "a", "SDP Semantics")
 
 	config := webrtc.Configuration{
@@ -50,6 +55,7 @@ func main() {
 		}
 	}
 
+	// 创建 PeerConnection
 	peerConnection, err := webrtc.NewPeerConnection(config)
 	if err != nil {
 		panic(err)
@@ -67,6 +73,7 @@ func main() {
 		codecName = webrtc.H264
 	}
 
+	//
 	videoTrack, err := peerConnection.NewTrack(payloadType, 2048, "video", "video")
 	if err != nil {
 		panic(err)
@@ -79,6 +86,7 @@ func main() {
 
 	u1 := url.URL{Scheme: "ws", Host: "47.96.250.166:8080", Path: "/webrtc/"}
 
+	// 连接 webrtc session
 	c1, _, err := websocket.DefaultDialer.Dial(u1.String(), nil)
 	if err != nil {
 		panic(err)
@@ -119,12 +127,14 @@ func main() {
 	}
 	defer device.Close()
 
+	// 初始化 PCA9685
 	device.SetFrequency(50.0)
 	defer device.SetPulse(0, 0)
 	defer device.SetPulse(1, 0)
 
 	u2 := url.URL{Scheme: "ws", Host: "47.96.250.166:8080", Path: "/sensor/"}
 
+	// 连接 sensor session
 	c2, _, err := websocket.DefaultDialer.Dial(u2.String(), nil)
 	if err != nil {
 		panic(err)
@@ -149,6 +159,7 @@ func main() {
 				panic(err)
 			}
 
+			// 处理传感器数据
 			if v.Gamma > 0 {
 				alpha = setInterval(v.Alpha, 90, 300)
 				alpha -= 270
@@ -168,8 +179,8 @@ func main() {
 				gamma = -v.Gamma + 45
 			}
 
-			device.SetPulse(0, gamma*10+500)
-			device.SetPulse(1, alpha*10+500)
+			device.SetPulse(0, gamma*10+500) // 大致范围为600～2200
+			device.SetPulse(1, alpha*10+500) // 大致范围为600～2500
 
 			/* verticalDirection := v.Gamma * -180.0 / math.Pi
 			levelDirection := 180.0 - (v.Alpha * -180.0 / math.Pi)

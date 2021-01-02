@@ -1,12 +1,5 @@
-// Package gst provides an easy API to create an appsink pipeline
 package gst
 
-/*
-#cgo pkg-config: gstreamer-1.0 gstreamer-app-1.0
-
-#include "gst.h"
-
-*/
 import "C"
 import (
 	"fmt"
@@ -37,7 +30,7 @@ const (
 	videoClockRate = 90000
 )
 
-// CreatePipeline creates a GStreamer Pipeline
+// CreatePipeline 创建 Streamer 管道
 func CreatePipeline(codecName string, tracks []*webrtc.Track) *Pipeline {
 	pipelineStr := "appsink name=appsink"
 	pipelineSrc := "v4l2src ! video/x-raw, width=640, height=640, framerate=30/1"
@@ -73,17 +66,16 @@ func CreatePipeline(codecName string, tracks []*webrtc.Track) *Pipeline {
 	return pipeline
 }
 
-// Start starts the GStreamer Pipeline
+// Start 开启 Streamer 管道
 func (p *Pipeline) Start() {
 	C.gstreamer_send_start_pipeline(p.Pipeline, C.int(p.id))
 }
 
-// Stop stops the GStreamer Pipeline
+// Stop 停止 Streamer 管道
 func (p *Pipeline) Stop() {
 	C.gstreamer_send_stop_pipeline(p.Pipeline)
 }
 
-//export goHandlePipelineBuffer
 func goHandlePipelineBuffer(buffer unsafe.Pointer, bufferLen C.int, duration C.int, pipelineID C.int) {
 	pipelinesLock.Lock()
 	pipeline, ok := pipelines[int(pipelineID)]
